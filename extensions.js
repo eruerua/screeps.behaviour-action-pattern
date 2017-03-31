@@ -50,6 +50,22 @@ mod.extend = function(){
             return this._adjacent;
         }
     });
+    Object.defineProperty(RoomPosition.prototype, 'radius', {
+        configurable: true,
+        value: function(radius = 1) {
+            if (radius === 1) return this.adjacent;
+            if (radius < 1) return [];
+            const positions = [];
+            for (let x = this.x - radius; x < this.x + radius * 2; x++) {
+                for (let y = this.y - radius; y < this.y + radius * 2; y++) {
+                    if (50 > x && x > 0 && 0 < y && y < 50) {
+                        positions.push(new RoomPosition(x, y, this.roomName));
+                    }
+                }
+            }
+            return positions;
+        },
+    });
     Object.defineProperty(RoomObject.prototype, 'accessibleFields', {
         configurable: true,
         get: function() {
