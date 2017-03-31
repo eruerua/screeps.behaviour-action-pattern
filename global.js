@@ -489,7 +489,7 @@ mod.startProfiling = function(name, options) {
             mod.profiler.totalCPU = mod.profiler.totalCPU + totalUsed;
             mod.profiler.totalTicks = mod.profiler.totalTicks + 1;
             const avgCPU = mod.profiler.totalCPU / mod.profiler.totalTicks;
-            if (PROFILE && PROFILING.AVERAGE_USAGE && _.size(mod.profiler.types) > 0) {
+            if (PROFILE && !PROFILING.BASIC_ONLY && PROFILING.AVERAGE_USAGE && _.size(mod.profiler.types) > 0) {
                 let heading = '';
                 while (heading.length < 30) heading += ' ';
                 global.logSystem(heading, '(avg/creep/tick) (active) (weighted avg) (executions)');
