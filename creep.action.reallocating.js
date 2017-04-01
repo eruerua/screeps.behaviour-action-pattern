@@ -778,5 +778,5 @@ action.work = function(creep) {
     return workResult;
 };
 action.onAssignment = function(creep, target) {
-    if( SAY_ASSIGNMENT ) creep.say(String.fromCodePoint(0x2194), SAY_PUBLIC);
+    if( SAY_ASSIGNMENT ) creep.say(ACTION_SAY.REALLOCATING, SAY_PUBLIC);
 };

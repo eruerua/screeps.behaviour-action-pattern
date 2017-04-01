@@ -14,5 +14,5 @@ action.step = function(creep){
     delete creep.data.targetId;
 };
 action.onAssignment = function(creep, target) {
-    if( SAY_ASSIGNMENT ) creep.say(String.fromCodePoint(0x1F3B6), SAY_PUBLIC);
+    if( SAY_ASSIGNMENT ) creep.say(ACTION_SAY.IDLE, SAY_PUBLIC);
 };

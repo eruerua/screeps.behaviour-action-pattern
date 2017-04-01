@@ -50,5 +50,5 @@ action.work = function(creep){
     return creep.dismantle(creep.target);
 };
 action.onAssignment = function(creep, target) {
-    if( SAY_ASSIGNMENT ) creep.say(String.fromCodePoint(0x1F527), SAY_PUBLIC);
+    if( SAY_ASSIGNMENT ) creep.say(ACTION_SAY.DISMANTLING, SAY_PUBLIC);
 };
