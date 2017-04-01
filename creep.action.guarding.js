@@ -24,5 +24,5 @@ action.work = function(creep){
     else return ERR_INVALID_ARGS;
 };
 action.onAssignment = function(creep, target) {
-    if( SAY_ASSIGNMENT ) creep.say(String.fromCharCode(9929), SAY_PUBLIC);
+    if( SAY_ASSIGNMENT ) creep.say(String.fromCodePoint(0x1F46E) + String.fromCodePoint(0x1F3FC), SAY_PUBLIC);
 };

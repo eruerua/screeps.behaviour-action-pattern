@@ -25,5 +25,5 @@ action.work = function(creep){
     return creep.build(creep.target);
 };
 action.onAssignment = function(creep, target) {
-    if( SAY_ASSIGNMENT ) creep.say(String.fromCharCode(9874), SAY_PUBLIC); 
+    if( SAY_ASSIGNMENT ) creep.say(String.fromCodePoint(0x2692), SAY_PUBLIC);
 };

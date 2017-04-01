@@ -90,7 +90,7 @@ action.run = {
     }
 };
 action.onAssignment = function(creep, target) {
-    if( SAY_ASSIGNMENT ) creep.say(String.fromCharCode(9876), SAY_PUBLIC);
+    if( SAY_ASSIGNMENT ) creep.say(String.fromCodePoint(0x2694), SAY_PUBLIC);
 };
 action.defaultStrategy.priorityTargetFilter = function(creep) {
     return function(hostile) {

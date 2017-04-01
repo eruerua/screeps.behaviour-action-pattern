@@ -44,7 +44,7 @@ action.work = function(creep){
     return ret;
 };
 action.onAssignment = function(creep, target) {
-    if( SAY_ASSIGNMENT ) creep.say(String.fromCharCode(9760), SAY_PUBLIC);
+    if( SAY_ASSIGNMENT ) creep.say(String.fromCodePoint(0x1F480), SAY_PUBLIC);
 };
 action.defaultStrategy.moveOptions = function(options) {
     // // allow routing in and through hostile rooms
