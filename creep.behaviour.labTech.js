@@ -39,6 +39,7 @@ mod.nextAction = function(creep){
         Creep.action.withdrawing.debounce(creep, outflowPriority, function(withdrawing) {
             priority.push(withdrawing);
         });
+        priority.push(Creep.action.storing);
         priority.push(Creep.action.idle);
     } else {
         priority = outflowPriority.concat([
