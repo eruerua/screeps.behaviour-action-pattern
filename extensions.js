@@ -54,7 +54,7 @@ mod.extend = function(){
         configurable: true,
         value: function(radius = 1) {
             if (radius === 1) return this.adjacent;
-            if (radius < 1) return [];
+            if (radius < 1) return [this];
             const positions = [];
             for (let x = this.x - radius; x < this.x + radius; x++) {
                 for (let y = this.y - radius; y < this.y + radius; y++) {
