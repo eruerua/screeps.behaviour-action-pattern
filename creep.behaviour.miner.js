@@ -2,10 +2,13 @@ let mod = {};
 module.exports = mod;
 mod.name = 'miner';
 mod.approach = function(creep){
-    let targetPos = new RoomPosition(creep.data.determinatedSpot.x, creep.data.determinatedSpot.y, creep.data.homeRoom);
-    let range = creep.pos.getRangeTo(targetPos);
-    if( range > 0 )
-        creep.travelTo( targetPos, {range:0} );
+    const targetPos = new RoomPosition(creep.data.determinatedSpot.x, creep.data.determinatedSpot.y, creep.data.homeRoom);
+    const range = creep.pos.getRangeTo(targetPos);
+    if (range > 0) {
+        const targetRange = targetPos.lookFor(LOOK_CREEPS).length ? 1 : 0;
+        if (range > targetRange)
+            creep.travelTo( targetPos, {range:targetRange} );
+    }
     return range;
 };
 mod.determineTarget = creep => {
@@ -36,46 +39,53 @@ mod.run = function(creep, params = {}) {
     if( source ) {
         if (!creep.action || creep.action.name !== 'harvesting') Population.registerAction(creep, Creep.action.harvesting, source);
         if( !creep.data.determinatedSpot ) {
-            let args = {
-                spots: [{
-                    pos: source.pos,
-                    range: 1
-                }],
-                checkWalkable: true,
-                where: null,
-                roomName: creep.pos.roomName
-            };
-
             let invalid = [];
             let findInvalid = entry => {
                 const predictedRenewal = entry.predictedRenewal ? entry.predictedRenewal : entry.spawningTime;
-                if( entry.roomName == args.roomName && ['miner', 'upgrader'].includes(entry.creepType) && entry.determinatedSpot
+                if( entry.roomName === creep.pos.roomName && ['miner', 'upgrader'].includes(entry.creepType) && entry.determinatedSpot
                     && entry.ttl > predictedRenewal )
                     invalid.push(entry.determinatedSpot);
             };
             _.forEach(Memory.population, findInvalid);
-            args.where = pos => !_.some(invalid,{x:pos.x,y:pos.y});
-
-            if( source.container )
-                args.spots.push({
-                    pos: source.container.pos,
-                    range: 1
-                });
-            if( !params.remote && source.link )
-                args.spots.push({
-                    pos: source.link.pos,
-                    range: 1
-                });
-            let spots = Room.fieldsInRange(args);
-            if( spots.length > 0 ){
-                let spot = creep.pos.findClosestByPath(spots, {filter: pos => {
-                    return !_.some(
-                        creep.room.lookForAt(LOOK_STRUCTURES, pos),
-                        {'structureType': STRUCTURE_ROAD }
-                    );
-                }});
-                if( !spot ) spot = creep.pos.findClosestByPath(spots) || spots[0];
-                if( spot ) {
+            const containerSpot = (source.container && source.container.pos.isNearTo(source)
+                && !_.some(invalid,{x:source.container.pos.x, y:source.container.pos.y})) ? source.container.pos : null;
+            let spots = [];
+            let args;
+            if (!containerSpot) {
+                args = {
+                    spots: [{
+                        pos: source.pos,
+                        range: 1
+                    }],
+                    checkWalkable: true,
+                    where: pos => !_.some(invalid,{x:pos.x,y:pos.y}),
+                    roomName: creep.pos.roomName
+                };
+                if( source.container ) {
+                    args.spots.push({
+                        pos: source.container.pos,
+                        range: 1
+                    });
+                }
+                if( !params.remote && source.link )
+                    args.spots.push({
+                        pos: source.link.pos,
+                        range: 1
+                    });
+                spots = Room.fieldsInRange(args);
+            }
+            if (containerSpot || spots.length > 0) {
+                let spot = containerSpot;
+                if (!spot) {
+                    spot = creep.pos.findClosestByPath(spots, {filter: pos => {
+                        return !_.some(
+                            creep.room.lookForAt(LOOK_STRUCTURES, pos),
+                            {'structureType': STRUCTURE_ROAD }
+                        );
+                    }});
+                }
+                if (!spot) spot = creep.pos.findClosestByPath(spots) || spots[0];
+                if (spot) {
                     creep.data.determinatedSpot = {
                         x: spot.x,
                         y: spot.y
@@ -99,6 +109,7 @@ mod.run = function(creep, params = {}) {
         }
 
         if( creep.data.determinatedSpot ) {
+            const range = params.approach(creep); // move to position if not in range
             const perHarvest = creep => creep.data.body && creep.data.body.work ? (creep.data.body.work*2) : (creep.carryCapacity/2);
             if( source.energy === 0 ) { // for mineral miners source.energy is undefined so this is false
                 const carryThreshold = (creep.data.body&&creep.data.body.work ? (creep.data.body.work*5) : (creep.carryCapacity/2));
@@ -158,7 +169,6 @@ mod.run = function(creep, params = {}) {
                 return; // idle
             } else if( !params.remote && source.link && source.link.energy < source.link.energyCapacity ) {
                 if(CHATTY) creep.say('harvesting', SAY_PUBLIC);
-                let range = params.approach(creep);
                 if( range === 0 ){
                     if(creep.carry.energy > ( creep.carryCapacity - ( creep.data.body&&creep.data.body.work ? (creep.data.body.work*2) : (creep.carryCapacity/2) )))
                         creep.transfer(source.link, RESOURCE_ENERGY);
@@ -166,7 +176,6 @@ mod.run = function(creep, params = {}) {
                 }
             } else if( source.container && source.container.sum < source.container.storeCapacity ) {
                 if(CHATTY) creep.say('harvesting', SAY_PUBLIC);
-                let range = params.approach(creep);
                 if( range === 0 ){
                     if( creep.sum > ( creep.carryCapacity - perHarvest(creep) )){
                         let transfer = r => { if(creep.carry[r] > 0 ) creep.transfer(source.container, r); };
@@ -176,7 +185,6 @@ mod.run = function(creep, params = {}) {
                 }
             } else {
                 if(CHATTY) creep.say('dropmining', SAY_PUBLIC);
-                let range = params.approach(creep);
                 if( range === 0 ){
                     if( creep.sum > ( creep.carryCapacity - perHarvest(creep) )) {
                         if( OOPS ) creep.say(String.fromCharCode(8681), SAY_PUBLIC);

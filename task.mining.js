@@ -2,18 +2,9 @@ const mod = {};
 module.exports = mod;
 mod.minControllerLevel = 2;
 mod.name = 'mining';
-mod.register = () => {
-    // when a new flag has been found (occurs every tick, for each flag)
-    Flag.found.on( flag => Task.mining.handleFlagFound(flag) );
-    // when a flag has been removed
-    Flag.FlagRemoved.on( flagName => Task.mining.handleFlagRemoved(flagName) );
-    // a creep starts spawning
-    Creep.spawningStarted.on( params => Task.mining.handleSpawningStarted(params) );
-    Creep.spawningCompleted.on( creep => Task.mining.handleSpawningCompleted(creep) );
-    Creep.died.on( name => Task.mining.handleCreepDied(name));
-};
+mod.register = () => {};
 mod.checkFlag = (flag) => {
-    if( flag.color == FLAG_COLOR.claim.mining.color && flag.secondaryColor == FLAG_COLOR.claim.mining.secondaryColor ) {
+    if (flag.compareTo(FLAG_COLOR.claim.mining)) {
         flag.memory.roomName = flag.pos.roomName;
         flag.memory.task = mod.name;
         return true;
@@ -211,29 +202,29 @@ mod.checkForRequiredCreeps = (flag) => {
     }
 
     // only spawn haulers for sources a miner has been spawned for
-    const maxHaulers = Math.ceil(memory.running.remoteMiner.length * REMOTE_HAULER_MULTIPLIER);
-    if(haulerCount < maxHaulers && (!memory.capacityLastChecked || Game.time - memory.capacityLastChecked > REMOTE_HAULER_CHECK_INTERVAL)) {
+    const maxHaulers = Math.ceil(memory.running.remoteMiner.length * REMOTE_HAULER.MULTIPLIER);
+    if(haulerCount < maxHaulers && (!memory.capacityLastChecked || Game.time - memory.capacityLastChecked > REMOTE_HAULER.CHECK_INTERVAL)) {
         for(let i = haulerCount; i < maxHaulers; i++) {
-            let minWeight = i >= 1 && REMOTE_HAULER_MIN_WEIGHT;
+            let minWeight = i >= 1 && REMOTE_HAULER.MIN_WEIGHT;
             const spawnRoom = mod.strategies.hauler.spawnRoom(roomName, minWeight);
             if( !spawnRoom ) {
                 break;
             }
 
             // haulers set homeRoom if closer storage exists
-            const storageRoom = REMOTE_HAULER_REHOME && mod.strategies.hauler.homeRoom(roomName) || spawnRoom;
+            const storageRoom = REMOTE_HAULER.REHOME && mod.strategies.hauler.homeRoom(roomName) || spawnRoom;
             let maxWeight = mod.strategies.hauler.maxWeight(roomName, storageRoom, memory); // TODO Task.strategies
-            if( !maxWeight || (!REMOTE_HAULER_ALLOW_OVER_CAPACITY && maxWeight < minWeight)) {
+            if( !maxWeight || (!REMOTE_HAULER.ALLOW_OVER_CAPACITY && maxWeight < minWeight)) {
                 memory.capacityLastChecked = Game.time;
                 break;
             }
 
-            if (_.isNumber(REMOTE_HAULER_ALLOW_OVER_CAPACITY)) {
-                maxWeight = Math.max(maxWeight, REMOTE_HAULER_ALLOW_OVER_CAPACITY);
-                minWeight = minWeight && Math.min(REMOTE_HAULER_MIN_WEIGHT, maxWeight);
-            } else if (REMOTE_HAULER_ALLOW_OVER_CAPACITY) {
-                maxWeight = Math.max(maxWeight, REMOTE_HAULER_MIN_WEIGHT);
-                minWeight = minWeight && Math.min(REMOTE_HAULER_MIN_WEIGHT, maxWeight);
+            if (_.isNumber(REMOTE_HAULER.ALLOW_OVER_CAPACITY)) {
+                maxWeight = Math.max(maxWeight, REMOTE_HAULER.ALLOW_OVER_CAPACITY);
+                minWeight = minWeight && Math.min(REMOTE_HAULER.MIN_WEIGHT, maxWeight);
+            } else if (REMOTE_HAULER.ALLOW_OVER_CAPACITY) {
+                maxWeight = Math.max(maxWeight, REMOTE_HAULER.MIN_WEIGHT);
+                minWeight = minWeight && Math.min(REMOTE_HAULER.MIN_WEIGHT, maxWeight);
             }
 
             // spawning a new hauler
@@ -356,7 +347,10 @@ mod.memory = key => {
 };
 mod.creep = {
     miner: {
-        fixedBody: [MOVE, WORK, WORK, WORK, WORK, WORK],
+        fixedBody: {
+            [MOVE]: 1,
+            [WORK]: 5,
+        },
         multiBody: [MOVE, MOVE, WORK, CARRY],
         maxMulti: 1,
         minEnergyCapacity: 550,
@@ -364,13 +358,21 @@ mod.creep = {
         queue: 'Medium' // not much point in hauling or working without a miner, and they're a cheap spawn.
     },
     hauler: {
-        fixedBody: [CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, WORK],
+        fixedBody: {
+            [CARRY]: 5,
+            [MOVE]: 3,
+            [WORK]: 1,
+        },
         multiBody: [CARRY, CARRY, MOVE],
         behaviour: 'remoteHauler',
         queue: 'Low'
     },
     worker: {
-        fixedBody: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK, WORK],
+        fixedBody: {
+            [CARRY]: 3,
+            [MOVE]: 3,
+            [WORK]: 3,
+        },
         multiBody: [], 
         behaviour: 'remoteWorker',
         queue: 'Low'
