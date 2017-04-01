@@ -58,8 +58,9 @@ mod.extend = function(){
             const positions = [];
             for (let x = this.x - radius; x < this.x + radius; x++) {
                 for (let y = this.y - radius; y < this.y + radius; y++) {
-                    if (50 > x && x > 0 && 0 < y && y < 50) {
-                        positions.push(new RoomPosition(x, y, this.roomName));
+                    const pos = new RoomPosition(x, y, this.roomName);
+                    if (50 > x && x > 0 && 0 < y && y < 50 && !_.isEqual(this, pos)) {
+                        positions.push(pos);
                     }
                 }
             }
