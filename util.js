@@ -76,10 +76,11 @@ module.exports = {
     /**
      * Returns the result of the function or the value passed
      * @param {*} value
+     * @param {...*} [args] - A list of arguments to pass if it's a function
      * @returns {*}
      */
-    fieldOrFunction(value) {
-        return typeof value === 'function' ? value() : value;
+    fieldOrFunction(value, ...args) {
+        return typeof value === 'function' ? value(...args) : value;
     },
     
     /**
@@ -334,7 +335,7 @@ module.exports = {
      * @param {string} roomName - The room to pave
      */
     pave(roomName) {
-        const flags = _.values(Game.flags).filter(f => f.pos.roomName === roomName && f.color === FLAG_COLOR.pavementArt.color && f.secondaryColor === FLAG_COLOR.pavementArt.secondaryColor)
+        const flags = _.values(Game.flags).filter(f => f.pos.roomName === roomName && f.compareTo(FLAG_COLOR.pavementArt));
         const val = Memory.pavementArt[roomName] === undefinede ? '' : Memory.pavementArt[roomName];
         const posMap = flag => `x${flag.pos.x}y${flag.pos.y}`;
         Memory.pavementArt[roomName] = val + flags.map(posMap).join('')+'x';
