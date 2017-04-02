@@ -1,0 +1,29 @@
+{
+  "ocs.internal": {
+    "reset": "upstream/dev",
+    "merge": [
+      "upstream/feature/actionRenewing",
+      "upstream/task/invasion",
+      "upstream/task/train-basic"
+    ]
+  },
+  "ocs.public": {
+    "reset": "upstream/dev",
+    "merge": [
+      "upstream/bug/droppingMovesToRandomFlag",
+      "upstream/change/behaveYourselves",
+      "upstream/change/determinatedObstacles",
+      "upstream/change/pickingStrategyResources",
+      "upstream/change/posRadius",
+      "upstream/change/remoteMinerStrategies",
+      "upstream/change/updateActionSay",
+      "upstream/change/visualsProfiling",
+      "upstream/feature/matrixReloaded",
+      "upstream/feature/traceAll",
+      "upstream/fix/minersRepair",
+      "upstream/hotfix/fixModulesReload",
+      "upstream/hotfix/guardsSpawnAtHome",
+      "upstream/task/labTechPartDeux"
+    ]
+  }
+}
