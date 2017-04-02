@@ -56,8 +56,8 @@ mod.extend = function(){
             if (radius === 1) return this.adjacent;
             if (radius < 1) return [this];
             const positions = [];
-            for (let x = this.x - radius; x < this.x + radius; x++) {
-                for (let y = this.y - radius; y < this.y + radius; y++) {
+            for (let x = this.x - radius; x <= this.x + radius; x++) {
+                for (let y = this.y - radius; y <= this.y + radius; y++) {
                     const pos = new RoomPosition(x, y, this.roomName);
                     if (50 > x && x > 0 && 0 < y && y < 50 && !_.isEqual(this, pos)) {
                         positions.push(pos);
