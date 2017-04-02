@@ -22,18 +22,18 @@ action.onAssignment = function(creep, target) {
     //if( SAY_ASSIGNMENT ) creep.say(String.fromCharCode(9738), SAY_PUBLIC);
     if( SAY_ASSIGNMENT ) creep.say('\u{1F4E4}\u{FE0E}', SAY_PUBLIC);
 };
-action.debounce = function(creep, outflowActions, callback, thisArg) {
-    let shouldCall = false;
+action.debounce = function(creep, outflowActions, thisArg) {
     if (creep.data.lastAction === 'storing' && creep.data.lastTarget === creep.room.storage.id) {
         // cycle detected
-        shouldCall = _.some(outflowActions, a => a.newTarget(creep));
-    } else {
-        shouldCall = true;
+        const dummyCreep = {};
+        for (let key in creep) {
+            dummyCreep[key] = creep[key];
+        }
+        for (let key in dummyCreep.carry) {
+            dummyCreep.carry[key] = 0;
+        }
+        dummyCreep.carry[RESOURCE_ENERGY] = dummyCreep.carryCapacity; // assume we get a full load of energy
+        return _.some(outflowActions, a => a.name !== 'storing' && a.isValidAction(dummyCreep) && a.isAddableAction(dummyCreep) && a.newTarget(creep));
     }
-
-    if (shouldCall) {
-        return _.invoke([thisArg], callback, this)[0];
-    }
-
-    return undefined;
+    return true;
 };
