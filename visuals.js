@@ -506,6 +506,7 @@ Visuals.extend = function() {
 };
 
 Visuals.run = function() {
+    const p = Util.startProfiling('Visuals', Game.cpu.getUsed());
     for (let roomName in Game.rooms) {
         const room = Game.rooms[roomName];
         if (!ROOM_VISUALS_ALL && !room.my) continue;
@@ -516,70 +517,94 @@ Visuals.run = function() {
         if (VISUALS.HEATMAP) {
             if (Game.time % VISUALS.HEATMAP_INTERVAL === 0) {
                 Visuals.setHeatMapData(room);
+                p.checkCPU('Heatmap.set');
             }
             
             if (Memory.heatmap) {
                 Visuals.drawHeatMapData(room);
+                p.checkCPU('Heatmap.draw');
                 continue;
             }
         }
         
         if (VISUALS.ROOM) {
             Visuals.drawRoomInfo(room, VISUALS.ROOM_GLOBAL);
+            p.checkCPU('Room Info')
         }
         if (VISUALS.ROOM_ORDERS) {
             Visuals.drawRoomOrders(room);
+            p.checkCPU('Room Orders');
         }
         if (VISUALS.ROOM_OFFERS) {
             Visuals.drawRoomOffers(room);
+            p.checkCPU('Room Offers');
         }
         if (VISUALS.CONTROLLER) {
             Visuals.drawControllerInfo(room.controller);
+            p.checkCPU('Controller');
         }
         if (VISUALS.SPAWN) {
             room.structures.spawns.filter(s => s.spawning).forEach(Visuals.drawSpawnInfo);
+            p.checkCPU('Spawns')
         }
         if (VISUALS.MINERAL) {
             let [mineral] = room.minerals;
-            if (mineral) Visuals.drawMineralInfo(mineral);
+            if (mineral) {
+                Visuals.drawMineralInfo(mineral);
+                p.checkCPU('Mineral');
+            }
         }
         if (VISUALS.SOURCE) {
             room.sources.forEach(Visuals.drawSourceInfo);
+            p.checkCPU('Sources');
         }
         if (VISUALS.WALL) {
             Visuals.highlightWeakest(room, STRUCTURE_WALL);
+            p.checkCPU('Walls');
         }
         if (VISUALS.RAMPART) {
             Visuals.highlightWeakest(room, STRUCTURE_RAMPART);
+            p.checkCPU('Ramparts');
         }
         if (VISUALS.ROAD) {
             Visuals.highlightWeakest(room, STRUCTURE_ROAD);
+            p.checkCPU('Roads');
         }
         if (VISUALS.STORAGE) {
             Visuals.storage(room);
+            p.checkCPU('Storage');
         }
         if (VISUALS.TERMINAL) {
             Visuals.terminal(room);
+            p.checkCPU('Terminal');
         }
         if (VISUALS.TOWER) {
             room.structures.towers.forEach(Visuals.drawTowerInfo);
+            p.checkCPU('Towers');
         }
         if (VISUALS.TRANSACTIONS) {
             Visuals.drawTransactions(room);
+            p.checkCPU('Transactions');
         }
         if (VISUALS.LABS) {
             Visuals.drawLabs(room);
+            p.checkCPU('Labs');
         }
         if (VISUALS.CREEP) {
             Visuals.drawCreepPath(room);
+            p.checkCPU('Creep Paths');
         }
     }
+    p.checkCPU('Room Loop');
     if (VISUALS.ROOM_GLOBAL) {
         if (VISUALS.CPU) {
             Visuals.collectSparklineStats();
+            p.checkCPU('CPU Sparklines');
         }
         Visuals.drawGlobal();
+        p.checkCPU('Global');
     }
+    p.totalCPU();
 };
 
 function formatNum(n) {
