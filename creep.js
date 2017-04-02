@@ -86,7 +86,7 @@ mod.extend = function(){
                     });
                     Population.countCreep(this.room, entry);
                 } else {
-                    console.log( dye(CRAYON.error, 'Corrupt creep without population entry!! : ' + this.name ));
+                    console.log( dye(CRAYON.error, 'Corrupt creep without population entry!! : ' + this.name ), Util.stack());
                     // trying to import creep
                     let counts = _.countBy(this.body, 'type');
                     if( counts[WORK] && counts[CARRY])
@@ -365,7 +365,7 @@ mod.execute = function(){
         try {
             creep.run();
         } catch (e) {
-            console.log('<span style="color:FireBrick">Creep ' + creep.name + (e.stack || e.toString()) + '</span>');
+            console.log('<span style="color:FireBrick">Creep ' + creep.name + (e.stack || e.toString()) + '</span>', Util.stack());
         }
     };
     _.forEach(Game.creeps, run);
