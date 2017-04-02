@@ -130,11 +130,13 @@ mod.run = function(creep, params = {}) {
                     }
                     if (creep.carry.energy === 0) return; // we need at least some energy to do both in the same tick.
                 }
-                if (!creep.data.repairChecked || Game.time - creep.data.repairChecked > MINER_WORK_THRESHOLD) {
+                if (creep.data.repairTarget || !creep.data.repairChecked || Game.time - creep.data.repairChecked > MINER_WORK_THRESHOLD) {
                     let repairTarget = Game.getObjectById(creep.data.repairTarget);
                     if (!repairTarget) {
                         const targets = params.remote ? creep.room.structures.repairable : creep.room.structures.fortifyable;
-                        const repairs = creep.pos.findInRange(targets, 3);
+                        const repairs = creep.pos.findInRange(targets, 3, {
+                            filter: s => s.structureType === STRUCTURE_CONTAINER || s.structureType === STRUCTURE_ROAD
+                        });
                         if (repairs.length) {
                             repairTarget = repairs[0];
                             creep.data.repairTarget = repairTarget.id;
@@ -148,7 +150,7 @@ mod.run = function(creep, params = {}) {
                         creep.data.repairChecked = Game.time;
                     }
                 }
-                if (!creep.data.buildChecked || Game.time - creep.data.buildChecked > MINER_WORK_THRESHOLD) {
+                if (creep.data.buildTarget || !creep.data.buildChecked || Game.time - creep.data.buildChecked > MINER_WORK_THRESHOLD) {
                     let buildTarget = Game.getObjectById(creep.data.buildTarget);
                     if (!buildTarget) {
                         const sites = creep.pos.findInRange(creep.room.myConstructionSites, 3);
